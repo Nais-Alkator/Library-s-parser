@@ -34,7 +34,7 @@ def download_books(folder="books"):
 
 
 def download_image(images_folder="images"):
-    for book in range(1, 11):
+    for book in range(1, 6):
         url_for_download = "http://tululu.org/txt.php?id={}".format(book)
         response_for_download = requests.get(url_for_download, allow_redirects=False)
         response_for_download.raise_for_status() 
