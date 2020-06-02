@@ -28,6 +28,7 @@ def download_books(folder="books"):
             image = urljoin(url_for_title, image)
             filename = os.path.join(folder, header)
 
+            #Добавляем жанр книги
             print(header)
             genres = soup.find("span", class_="d_book")
             genres = genres.text
