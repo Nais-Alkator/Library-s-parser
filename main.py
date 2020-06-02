@@ -27,11 +27,20 @@ def download_books(folder="books"):
             image = soup.find("div", class_="bookimage").find("a").find("img")["src"]
             image = urljoin(url_for_title, image)
             filename = os.path.join(folder, header)
-            comments = soup.find_all("div", class_="texts")
+
             print(header)
-            for comment in comments:
-                comment = comment.find("span")
-                print(comment.text)
+            genres = soup.find("span", class_="d_book")
+            genres = genres.text
+            print(genres)
+
+            #Добавляем комментарии
+            #comments = soup.find_all("div", class_="texts")
+            #print(header)
+            #for comment in comments:
+                #comment = comment.find("span")
+                #print(comment.text)
+
+        #Скачивание книг
         #if response_for_download.content:
             #with open(filename, 'wb') as file:
                 #file.write(response_for_download.content)
