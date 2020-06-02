@@ -7,6 +7,10 @@ url = "http://tululu.org/l55"
 response = requests.get(url)
 response.raise_for_status()
 soup = BeautifulSoup(response.text, "lxml")
-first_book = soup.find("div", class_="bookimage").find("a")["href"]
-first_book = urljoin(url, first_book)
-print(first_book)
+all_books = soup.find_all("div", class_="bookimage")
+
+for book in all_books:
+	book = book.find("a")["href"]
+	book = urljoin(url, book)
+	print(book)
+
