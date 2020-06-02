@@ -27,14 +27,18 @@ def download_books(folder="books"):
             image = soup.find("div", class_="bookimage").find("a").find("img")["src"]
             image = urljoin(url_for_title, image)
             filename = os.path.join(folder, header)
-
-        if response_for_download.content:
-            with open(filename, 'wb') as file:
-                file.write(response_for_download.content)
+            comments = soup.find_all("div", class_="texts")
+            print(header)
+            for comment in comments:
+                comment = comment.find("span")
+                print(comment.text)
+        #if response_for_download.content:
+            #with open(filename, 'wb') as file:
+                #file.write(response_for_download.content)
 
 
 def download_image(images_folder="images"):
-    for book in range(1, 6):
+    for book in range(1, 11):
         url_for_download = "http://tululu.org/txt.php?id={}".format(book)
         response_for_download = requests.get(url_for_download, allow_redirects=False)
         response_for_download.raise_for_status() 
@@ -45,11 +49,12 @@ def download_image(images_folder="images"):
             soup = BeautifulSoup(response_for_title.text, 'lxml')
             image = soup.find("div", class_="bookimage").find("a").find("img")["src"]
             image = urljoin(url_for_title, image)
+            print(image)
             response_image = requests.get(image)
             filename = os.path.join(images_folder, "{0}{1}".format(book, image[-4:]))
             with open(filename, 'wb') as file:
                 file.write(response_image.content)
 
 if __name__ == "__main__":             
-    download_image()
+    download_books()
 

@@ -1,2 +1,3 @@
-image = "alkator.jpg"
-print(image[-4:])
+image = "images/alkator.jpg"
+image = image.split("images/")
+print(image)
