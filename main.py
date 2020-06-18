@@ -4,15 +4,16 @@ from pathvalidate import sanitize_filename
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 import json
+import argparse
 
 
 books_folder = os.makedirs("books", exist_ok=True)
 images_folder = os.makedirs("images", exist_ok=True)
 
 
-def get_links_for_books(): 
+def get_links_for_books(start_page, end_page): 
     links_for_books = [] 
-    for page in range(1, 2):
+    for page in range(start_page, end_page):
         url = "http://tululu.org/l55/{}".format(page)
         response = requests.get(url)
         response.raise_for_status()
@@ -46,7 +47,7 @@ def download_books(links_for_books, folder="books"):
 
             #Добавляем жанр книги
             print(header)
-            genres = soup.select_one("span .d_book")
+            genres = soup.find("span", class_="d_book")
             genres = genres.text
             print(genres)
 
@@ -91,7 +92,20 @@ def download_image(links_for_books, images_folder="images"):
                 with open(filename, 'wb') as file:
                     file.write(response_image.content)
 
+
+def get_parser():
+    parser = argparse.ArgumentParser(description="Скрипт скачивает книги и обложки к ним с сайта tululu.org")
+    parser.add_argument("--start_page", help="Начальная страница для скачивания", type=int, default=1)
+    parser.add_argument("--end_page", help="Конечная страница для скачивания", type=int, default=5)
+    return parser
+
+
+
+
 if __name__ == "__main__":   
-    links_for_books = get_links_for_books()          
-    #download_books(links_for_books)
+    args = get_parser().parse_args()
+    start_page = args.start_page
+    end_page = args.end_page
+    links_for_books = get_links_for_books(start_page, end_page)          
+    download_books(links_for_books)
     download_image(links_for_books)
