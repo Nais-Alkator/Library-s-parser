@@ -12,14 +12,14 @@ images_folder = os.makedirs("images", exist_ok=True)
 
 def get_links_for_books(): 
     links_for_books = [] 
-    for page in range(1, 5):
+    for page in range(1, 2):
         url = "http://tululu.org/l55/{}".format(page)
         response = requests.get(url)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, "lxml")
-        all_books = soup.find_all("div", class_="bookimage")
+        all_books = soup.select(".bookimage")
         for book in all_books:
-            book = book.find("a")["href"]
+            book = book.select_one("a")["href"]
             book = urljoin(url, book)
             links_for_books.append(book)
     return links_for_books
@@ -32,7 +32,7 @@ def download_books(links_for_books, folder="books"):
         response.raise_for_status() 
         if response.content:
             soup = BeautifulSoup(response.text, 'lxml')
-            title = soup.find("h1")
+            title = soup.select_one("h1")
             title = title.text.split("::")
             header = title[0].strip()
             header = "{}. ".format(header)
@@ -40,21 +40,21 @@ def download_books(links_for_books, folder="books"):
             author = title[1].strip()
             id_book = link.split(".org/b")
             id_book = id_book[1]
-            image = soup.find("div", class_="bookimage").find("a").find("img")["src"]
+            image = soup.select_one(".bookimage a img")["src"]
             image = urljoin(link, image)
             filename = os.path.join(folder, header)
 
             #Добавляем жанр книги
             print(header)
-            genres = soup.find("span", class_="d_book")
+            genres = soup.select_one("span .d_book")
             genres = genres.text
             print(genres)
 
             #Добавляем комментарии
-            comments = soup.find_all("div", class_="texts")
+            comments = soup.select("div .texts")
             comments_info = []
             for comment in comments:
-                comment = comment.find("span")
+                comment = comment.select_one("span")
                 comments_info.append(comment.text)
 
 
@@ -73,25 +73,25 @@ def download_books(links_for_books, folder="books"):
             json.dump(json_data, file, ensure_ascii=False)
             
 
-def download_image(images_folder="images"):
-    for number in range(1, 101):
-        for page in range(1, 5):
-            url_for_title = "http://tululu.org/l55/{}".format(page)
-            response_for_title = requests.get(url_for_title)
-            response_for_title.raise_for_status()
-            if response_for_title:
-                soup = BeautifulSoup(response_for_title.text, 'lxml')
-                images = soup.find_all("div", class_="bookimage")
-                for image in images:
-                    image_url = image.find("a").find("img")["src"]
-                    image_url = urljoin(url_for_title, image_url)
-                    image_name = image_url.split("tululu.org/")
-                    response_image = requests.get(image_url)
-                    filename = os.path.join(images_folder, "{0}{1}".format(number, image_url[-4:]))
-                    with open(filename, 'wb') as file:
-                        file.write(response_image.content)
+def download_image(links_for_books, images_folder="images"):
+    number = 1
+    for link in links_for_books:
+        response_for_title = requests.get(link)
+        response_for_title.raise_for_status()
+        if response_for_title:
+            soup = BeautifulSoup(response_for_title.text, 'lxml')
+            images = soup.select("div .bookimage")
+            for image in images:
+                image_url = image.select_one("a img")["src"]
+                image_url = urljoin(link, image_url)
+                image_name = image_url.split("tululu.org/")
+                response_image = requests.get(image_url)
+                filename = os.path.join(images_folder, "{0}{1}".format(number, image_url[-4:]))
+                number += 1
+                with open(filename, 'wb') as file:
+                    file.write(response_image.content)
 
 if __name__ == "__main__":   
     links_for_books = get_links_for_books()          
-    download_books(links_for_books)
-    #download_image()
+    #download_books(links_for_books)
+    download_image(links_for_books)
