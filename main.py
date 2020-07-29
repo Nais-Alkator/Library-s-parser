@@ -112,10 +112,10 @@ if __name__ == "__main__":
     images_folder = os.makedirs(images, exist_ok=True)
     json_folder = os.makedirs(json_folder, exist_ok=True)
     links_for_books = get_links_for_books(start_page, end_page) 
-    if skip_imgs and skip_txt == False:         
+    if not skip_imgs and not skip_txt:         
         download_books(links_for_books, json_path, books_folder=books)
         print("Скачивание книг завершено")
-    elif skip_txt and skip_imgs == False:
+    elif not skip_txt and not skip_imgs:
         download_images(links_for_books, images_folder=images)
         print("Скачивание обложек завершено")
     elif skip_txt and skip_imgs:
