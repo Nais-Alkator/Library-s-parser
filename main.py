@@ -143,9 +143,9 @@ if __name__ == "__main__":
     books = os.path.join(dest_folder, "books")
     images = os.path.join(dest_folder, "images")
     json_path = os.path.join(json_folder, "info.json")
-    books_folder = str(os.makedirs(books, exist_ok=True))
-    images_folder = str(os.makedirs(images, exist_ok=True))
-    json_folder = str(os.makedirs(json_folder, exist_ok=True))
+    os.makedirs(books, exist_ok=True)
+    os.makedirs(images, exist_ok=True)
+    os.makedirs(json_folder, exist_ok=True)
     links_for_books = get_links_for_books(start_page, end_page) 
     if skip_imgs and not skip_txt:         
         download_books(links_for_books, json_path, books_folder=books)
