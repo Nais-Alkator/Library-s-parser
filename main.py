@@ -27,7 +27,7 @@ def check_link(url):
 def get_links_for_books(start_page, end_page): 
     links_for_books = [] 
     for page in range(start_page, end_page):
-        url = "http://tululuf.org/l55/{}".format(page)
+        url = "http://tululu.org/l55/{}".format(page)
         response = check_link(url)
         soup = BeautifulSoup(response.text, "lxml")
         all_books = soup.select(".bookimage")
