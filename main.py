@@ -5,20 +5,29 @@ from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 import json
 import argparse
+import sys
 
 
 def check_link(url):
     try:
         response = requests.get(url, allow_redirects=False)
-    except requests.exceptions.HTTPError:
-        print("Неверный url")
+        response.raise_for_status()
+        if response.status_code == 301:
+            print("ОШИБКА. Редирект")
+            sys.exit()
+    except requests.exceptions.HTTPError as error:
+        print("ОШИБКА HTTP ERROR: ", error)
+        sys.exit()
+    except requests.exceptions.ConnectionError as error:
+        print("ОШИБКА СОЕДИНЕНИЯ: ", error)
+        sys.exit()
     return response
 
 
 def get_links_for_books(start_page, end_page): 
     links_for_books = [] 
     for page in range(start_page, end_page):
-        url = "http://tululu.org/l55/{}".format(page)
+        url = "http://tululuf.org/l55/{}".format(page)
         response = check_link(url)
         soup = BeautifulSoup(response.text, "lxml")
         all_books = soup.select(".bookimage")
