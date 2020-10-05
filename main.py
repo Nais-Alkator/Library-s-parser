@@ -10,9 +10,9 @@ import sys
 
 def check_link(url):
     try:
-        response = requests.get(url, allow_redirects=False)
-        response.raise_for_status()
-        if response.status_code == 301:
+        checked_link = requests.get(url, allow_redirects=False)
+        checked_link.raise_for_status()
+        if checked.status_code == 301:
             print("ОШИБКА. Редирект")
             sys.exit()
     except requests.exceptions.HTTPError as error:
@@ -75,7 +75,7 @@ def download_books(links_for_books, json_path, books_folder="books"):
                 file.write(response_for_download.content)
 
 
-def get_json(links_for_books, json_path, books_folder="books"):
+def create_json(links_for_books, json_path, books_folder="books"):
     json_data = []
     for link in links_for_books:
         response = check_link(link)
@@ -115,19 +115,19 @@ def get_json(links_for_books, json_path, books_folder="books"):
 def download_images(links_for_books, images_folder="images"):
     number = 1
     for link in links_for_books:
-        response_for_title = check_link(link)
-        if response_for_title:
-            soup = BeautifulSoup(response_for_title.text, 'lxml')
+        checked_link_for_title = check_link(link)
+        if checked_link_for_title:
+            soup = BeautifulSoup(checked_link_for_title.text, 'lxml')
             images = soup.select("div .bookimage")
             for image in images:
                 image_url = image.select_one("a img")["src"]
                 image_url = urljoin(link, image_url)
                 image_name = image_url.split("tululu.org/")
-                response_image = check_link(image_url)
+                checked_link_for_image = check_link(image_url)
                 filename = os.path.join(images_folder, "{0}{1}".format(number, image_url[-4:]))
                 number += 1
                 with open(filename, 'wb') as file:
-                    file.write(response_image.content)
+                    file.write(checked_link_for_image.content)
 
 
 def get_parser():
