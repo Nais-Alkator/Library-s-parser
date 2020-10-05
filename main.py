@@ -10,9 +10,9 @@ import sys
 
 def check_link(url):
     try:
-        checked_link = requests.get(url, allow_redirects=False)
+        checked_link = requests.get(url, allow_redirects=True)
         checked_link.raise_for_status()
-        if checked.status_code == 301:
+        if checked_link.status_code == 301:
             print("ОШИБКА. Редирект")
             sys.exit()
     except requests.exceptions.HTTPError as error:
@@ -21,10 +21,10 @@ def check_link(url):
     except requests.exceptions.ConnectionError as error:
         print("ОШИБКА СОЕДИНЕНИЯ: ", error)
         sys.exit()
-    return response
+    return checked_link
 
 
-def get_links_for_books(start_page, end_page): 
+def get_links_for_books(start_page, end_page):
     links_for_books = [] 
     for page in range(start_page, end_page):
         url = "http://tululu.org/l55/{}".format(page)
@@ -141,7 +141,7 @@ def get_parser():
     return parser
 
 
-if __name__ == "__main__":   
+if __name__ == "__main__":
     args = get_parser().parse_args()
     start_page = args.start_page
     end_page = args.end_page
@@ -155,20 +155,20 @@ if __name__ == "__main__":
     os.makedirs(books, exist_ok=True)
     os.makedirs(images, exist_ok=True)
     os.makedirs(json_folder, exist_ok=True)
-    links_for_books = get_links_for_books(start_page, end_page) 
+    links_for_books = get_links_for_books(start_page, end_page)
     if skip_txt and skip_imgs:
-        get_json(links_for_books, json_path, books_folder=books)
+        create_json(links_for_books, json_path, books_folder=books)
         print("Ничего не скачивается. Создан json файл.")
-    elif skip_imgs:         
+    elif skip_imgs: 
         download_books(links_for_books, json_path, books_folder=books)
-        get_json(links_for_books, json_path, books_folder=books)
+        create_json(links_for_books, json_path, books_folder=books)
         print("Скачивание книг завершено. Создан json файл.")
     elif skip_txt:
         download_images(links_for_books, images_folder=images)
-        get_json(links_for_books, json_path, books_folder=books)
+        create_json(links_for_books, json_path, books_folder=books)
         print("Скачивание обложек завершено. Создан json файл.")
     else:
         download_books(links_for_books, json_path, books_folder=books)
         download_images(links_for_books, images_folder=images)
-        get_json(links_for_books, json_path, books_folder=books)
+        create_json(links_for_books, json_path, books_folder=books)
         print("Скачивание книг и обложек завершено. Создан json файл.")
