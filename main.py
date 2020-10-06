@@ -112,7 +112,7 @@ def download_images(links_for_books, images_folder="images"):
         checked_link_for_title = check_link(link)
         if checked_link_for_title:
             images = BeautifulSoup(checked_link_for_title.text, 'lxml').select("div .bookimage")
-            for image in images:
+            for image_tag in images_tags:
                 image_url = image.select_one("a img")["src"]
                 image_url = urljoin(link, image_url)
                 image_name = image_url.split("tululu.org/")
