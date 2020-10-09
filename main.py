@@ -12,9 +12,6 @@ def check_link(url):
     try:
         checked_link = requests.get(url, allow_redirects=True)
         checked_link.raise_for_status()
-        if checked_link.status_code == 301:
-            print("ОШИБКА. Редирект")
-            sys.exit()
     except requests.exceptions.HTTPError as error:
         print("ОШИБКА HTTP ERROR: ", error)
         sys.exit()
@@ -25,7 +22,7 @@ def check_link(url):
 
 
 def get_links_for_books(start_page, end_page):
-    links_for_books = [] 
+    links_for_books = []
     for page in range(start_page, end_page):
         url = "http://tululu.org/l55/{}".format(page)
         response = check_link(url)
@@ -66,7 +63,7 @@ def download_books(links_for_books, json_path, books_folder="books"):
             payload = {"txt.php": "", "id": id_book}
             link_for_download_book = "http://tululu.org"
             response_for_download = requests.get(link_for_download_book, params=payload, allow_redirects=False)
-            
+
             #Скачивание книг
             with open(filename, 'wb') as file:
                 file.write(response_for_download.content)
@@ -111,8 +108,8 @@ def download_images(links_for_books, images_folder="images"):
     for link_number, link in enumerate(links_for_books):
         checked_link_for_title = check_link(link)
         if checked_link_for_title:
-            images = BeautifulSoup(checked_link_for_title.text, 'lxml').select("div .bookimage")
-            for image_tag in images_tags:
+            images_tags = BeautifulSoup(checked_link_for_title.text, 'lxml').select("div .bookimage")
+            for image_tags in images_tags:
                 image_url = image.select_one("a img")["src"]
                 image_url = urljoin(link, image_url)
                 image_name = image_url.split("tululu.org/")
@@ -151,7 +148,7 @@ if __name__ == "__main__":
     if skip_txt and skip_imgs:
         create_json(links_for_books, json_path, books_folder=books)
         print("Ничего не скачивается. Создан json файл.")
-    elif skip_imgs: 
+    elif skip_imgs:
         download_books(links_for_books, json_path, books_folder=books)
         create_json(links_for_books, json_path, books_folder=books)
         print("Скачивание книг завершено. Создан json файл.")
