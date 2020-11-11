@@ -23,9 +23,9 @@ def get_books_urls(start_page, end_page):
         url = "http://tululu.org/l55/{}".format(page)
         response = requests.get(url, verify=False)
         check_for_redirection(response)
-        books_info = BeautifulSoup(response.text, "lxml").select(".bookimage")
-        for book in books_info:
-            book_link = book.select_one("a")["href"]
+        book_links = BeautifulSoup(response.text, "lxml").select(".bookimage")
+        for book_link in books_links:
+            book_link = book_link.select_one("a")["href"]
             book_url = urljoin(url, book_link)
             books_urls.append(book_url)
     return books_urls
