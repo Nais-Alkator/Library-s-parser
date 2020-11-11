@@ -7,6 +7,13 @@ import json
 import argparse
 import sys
 
+def check_for_redirection(response):
+    try:
+        response.raise_for_status()
+        if response.status_code != 200: 
+            raise requests.HTTPError
+    except (requests.HTTPError, requests.ConnectionError) as error:
+        print(f'{error}')
 
 def get_books_urls(start_page, end_page):
     books_urls = []
@@ -14,7 +21,7 @@ def get_books_urls(start_page, end_page):
         url = "http://tululu.org/l55/{}".format(page)
         try:
             response = requests.get(url)
-            response.raise_for_status()
+            check_for_redirection(response)
         except requests.exceptions.HTTPError as error:
             print("ОШИБКА HTTP ERROR: ", error)
             sys.exit()
