@@ -7,6 +7,7 @@ import json
 import argparse
 import sys
 
+
 def check_for_redirection(response):
     try:
         response.raise_for_status()
@@ -15,19 +16,13 @@ def check_for_redirection(response):
     except (requests.HTTPError, requests.ConnectionError) as error:
         print(f'{error}')
 
+
 def get_books_urls(start_page, end_page):
     books_urls = []
     for page in range(start_page, end_page):
         url = "http://tululu.org/l55/{}".format(page)
-        try:
-            response = requests.get(url)
-            check_for_redirection(response)
-        except requests.exceptions.HTTPError as error:
-            print("ОШИБКА HTTP ERROR: ", error)
-            sys.exit()
-        except requests.exceptions.ConnectionError as error:
-            print("ОШИБКА СОЕДИНЕНИЯ: ", error)
-            sys.exit()
+        response = requests.get(url, verify=False)
+        check_for_redirection(response)
         books_info = BeautifulSoup(response.text, "lxml").select(".bookimage")
         for book in books_info:
             book_link = book.select_one("a")["href"]
@@ -37,15 +32,8 @@ def get_books_urls(start_page, end_page):
 
 
 def parse_book_page(book_url):
-    try:
-        book_page = requests.get(book_url, allow_redirects=True)
-        book_page.raise_for_status()
-    except requests.exceptions.HTTPError as error:
-        print("ОШИБКА HTTP ERROR: ", error)
-        sys.exit()
-    except requests.exceptions.ConnectionError as error:
-        print("ОШИБКА СОЕДИНЕНИЯ: ", error)
-        sys.exit()
+    book_page = requests.get(book_url, verify=False)
+    check_for_redirection(book_page)
     if book_page.content:
         soup = BeautifulSoup(book_page.text, 'lxml')
         title = soup.select_one("h1")
@@ -84,43 +72,17 @@ def create_json_file(parsed_books_pages, json_path):
 def download_book_file(book_id, book_path):
     url = "http://tululu.org"
     payload = {"txt.php": "", "id": book_id}
-    try:
-        book_file = requests.get(url, params=payload, allow_redirects=False)
-        book_file.raise_for_status()
-    except requests.exceptions.HTTPError as error:
-        print("ОШИБКА HTTP ERROR: ", error)
-        sys.exit()
-    except requests.exceptions.ConnectionError as error:
-        print("ОШИБКА СОЕДИНЕНИЯ: ", error)
-        sys.exit()
+    book_file = requests.get(url, params=payload, verify=False)
+    check_for_redirection(book_file)
     with open(book_path, 'wb') as file:
         file.write(book_file.content)
 
 
 def download_image(image_url, images_folder, title):
-    try:
-        image_file = requests.get(image_url, allow_redirects=True)
-        image_file.raise_for_status()
-    except requests.exceptions.HTTPError as error:
-        print("ОШИБКА HTTP ERROR: ", error)
-        sys.exit()
-    except requests.exceptions.ConnectionError as error:
-        print("ОШИБКА СОЕДИНЕНИЯ: ", error)
-        sys.exit()
+    image_file = requests.get(image_url, allow_redirects=True, verify=False)
+    image_file.raise_for_status()
     image_name = image_url.split("tululu.org/")
     images_tags = BeautifulSoup(image_file.text, 'lxml').select("div .bookimage")
-    for image_tag in images_tags:
-        image_url = image_tag.select_one("a img")["src"]
-        image_url = urljoin(link, image_url)
-        image_name = image_url.split("tululu.org/")
-        try:
-            image_file = requests.get(image_url)
-        except requests.exceptions.HTTPError as error:
-            print("ОШИБКА HTTP ERROR: ", error)
-            sys.exit()
-        except requests.exceptions.ConnectionError as error:
-            print("ОШИБКА СОЕДИНЕНИЯ: ", error)
-            sys.exit()
     filename = os.path.join(images_folder, "{0}{1}".format(title, image_url[-4:]))
     with open(filename, 'wb') as file:
         file.write(image_file.content)
@@ -132,7 +94,7 @@ def get_parser():
     parser.add_argument("--end_page", help="Конечная страница для скачивания", type=int, default=5)
     parser.add_argument("--dest_folder", help="Путь к катологу с результатами парсинга", type=str, default="data")
     parser.add_argument("--skip_imgs", help="Не скачивать картинки", action="store_true")
-    parser.add_argument("--skip_txt", help="Не скачивать книги", action ="store_true")
+    parser.add_argument("--skip_txt", help="Не скачивать книги", action="store_true")
     parser.add_argument("--json_path", help="Путь к файлу json", type=str, default="json")
     return parser
 
