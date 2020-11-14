@@ -37,20 +37,20 @@ def parse_book_page(book_url):
     soup = BeautifulSoup(book_page.text, 'lxml')
     title = soup.select_one("h1")
     title = title.text.split("::")
-    header = title[0].strip()
-    header = sanitize_filename(header)
+    book_filename = title[0].strip()
+    book_filename = sanitize_filename(book_filename)
     author = title[1].strip()
     book_id = book_url.split(".org/b")[1]
     image_url = soup.select_one(".bookimage a img")["src"]
     image_url = urljoin(book_url, image_url)
-    book_path = os.path.join(books_folder, header)
+    book_path = os.path.join(books_folder, book_filename)
     genres = soup.find("span", class_="d_book").text
     comments = soup.select("div .texts")
     comments_info = []
     for comment in comments:
         comment = comment.select_one("span")
         comments_info.append(comment.text)
-    parsed_book_page = {"title": header, "author": author, "image_url": image_url, "book_path": book_path, 
+    parsed_book_page = {"title": book_filename, "author": author, "image_url": image_url, "book_path": book_path, 
     "comments": comments_info, "genres": genres, "book_id": book_id}
     return parsed_book_page
 
