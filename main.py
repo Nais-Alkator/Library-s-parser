@@ -45,13 +45,13 @@ def parse_book_page(book_url):
     image_url = urljoin(book_url, image_url)
     book_path = os.path.join(books_folder, book_filename)
     genres = soup.find("span", class_="d_book").text
-    comments = soup.select("div .texts")
-    comments_info = []
-    for comment in comments:
-        comment = comment.select_one("span")
-        comments_info.append(comment.text)
+    comments_tags = soup.select("div .texts")
+    comments_text = []
+    for comment_tag in comments_tags:
+        comment = comment_tag.select_one("span")
+        comments_text.append(comment.text)
     parsed_book_page = {"title": book_filename, "author": author, "image_url": image_url, "book_path": book_path, 
-    "comments": comments_info, "genres": genres, "book_id": book_id}
+    "comments": comments_text, "genres": genres, "book_id": book_id}
     return parsed_book_page
 
 
