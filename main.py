@@ -23,7 +23,7 @@ def get_books_urls(start_page, end_page):
         url = "http://tululu.org/l55/{}".format(page)
         response = requests.get(url, verify=False)
         check_for_redirection(response)
-        book_links = BeautifulSoup(response.text, "lxml").select(".bookimage")
+        books_links = BeautifulSoup(response.text, "lxml").select(".bookimage")
         for book_link in books_links:
             book_link = book_link.select_one("a")["href"]
             book_url = urljoin(url, book_link)
@@ -59,14 +59,6 @@ def parse_book_page(book_url):
         "genres": genres, 
         "book_id": book_id}
     return parsed_book_page
-
-
-def fetch_parsed_books_pages(books_urls):
-    parsed_books_pages = []
-    for book_url in books_urls:
-        parsed_book_page = parse_book_page(book_url)
-        parsed_books_pages.append(parsed_book_page)
-    return parsed_books_pages
 
 
 def create_json_file(parsed_books_pages, json_path):
@@ -119,7 +111,7 @@ if __name__ == "__main__":
     os.makedirs(images_folder, exist_ok=True)
     os.makedirs(json_folder, exist_ok=True)
     books_urls = get_books_urls(start_page, end_page)
-    parsed_books_pages = fetch_parsed_books_pages(books_urls)
+    parsed_books_pages = [parse_book_page(book_url) for book_url in books_urls]
     if skip_txt and skip_imgs:
         create_json_file(parsed_books_pages, json_path)
         print("Ничего не скачивается. Создан json файл c информацией о книгах.")
