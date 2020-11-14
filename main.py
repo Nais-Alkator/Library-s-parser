@@ -50,8 +50,14 @@ def parse_book_page(book_url):
     for comment_tag in comments_tags:
         comment = comment_tag.select_one("span")
         comments_text.append(comment.text)
-    parsed_book_page = {"title": book_filename, "author": author, "image_url": image_url, "book_path": book_path, 
-    "comments": comments_text, "genres": genres, "book_id": book_id}
+    parsed_book_page = {
+        "title": book_filename, 
+        "author": author, 
+        "image_url": image_url, 
+        "book_path": book_path, 
+        "comments": comments_text, 
+        "genres": genres, 
+        "book_id": book_id}
     return parsed_book_page
 
 
