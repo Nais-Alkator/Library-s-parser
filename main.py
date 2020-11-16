@@ -112,29 +112,22 @@ if __name__ == "__main__":
     os.makedirs(json_folder, exist_ok=True)
     books_urls = get_books_urls(start_page, end_page)
     parsed_books_pages = [parse_book_page(book_url) for book_url in books_urls]
-    if skip_txt and skip_imgs:
-        create_json_file(parsed_books_pages, json_path)
-        print("Ничего не скачивается. Создан json файл c информацией о книгах.")
-    elif skip_imgs:
-        for parsed_book_page in parsed_books_pages:
+    create_json_file(parsed_books_pages, json_path)
+    for parsed_book_page in parsed_books_pages:
+        book_path = parsed_book_page["book_path"]
+        image_url = parsed_book_page["image_url"]
+        if skip_txt and skip_imgs:
+            print("Генерируется файл с информацией о книгах. Добавлена информация о книге '{}'".format(parsed_book_page["title"]))
+        elif skip_imgs:
             title = parsed_book_page["title"]
-            book_path = parsed_book_page["book_path"]
             download_book_file(title, book_path)
-        create_json_file(parsed_books_pages, json_path)
-        print("Скачивание книг завершено. Создан json файл с информацией о книгах.")
-    elif skip_txt:
-        for parsed_book_page in parsed_books_pages:
-            image_url = parsed_book_page["image_url"]
-            title = parsed_book_page["title"].split('/')[0]
+            print("Скачана обложка книги '{}'".format(title))
+        elif skip_txt:
+            
             download_image(image_url, images_folder, title)
-        create_json_file(parsed_books_pages, json_path)
-        print("Скачивание обложек завершено. Создан json файл с информацией о книгах.")
-    else:
-        for parsed_book_page in parsed_books_pages:
-            image_url = parsed_book_page["image_url"]
+            print("Скачана книга '{}'".format(title))
+        else:
             title = parsed_book_page["title"].split('/')[0]
-            book_path = parsed_book_page["book_path"]
             download_book_file(title, book_path)
             download_image(image_url, images_folder, title)
-        create_json_file(parsed_books_pages, json_path)
-        print("Скачивание книг и обложек завершено. Создан json файл с информацией о книгах.")
+            print("Скачивание книга '{}'' и обложка к ней".format(title))
