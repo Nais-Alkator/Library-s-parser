@@ -37,7 +37,7 @@ def parse_book_page(book_url):
     book_filename = title[0].strip()
     book_filename = sanitize_filename(book_filename)
     author = title[1].strip()
-    book_id = book_url.split(".org/b")[1]
+    book_id = book_url.split(".org/b")[1][:-1]
     image_url = soup.select_one(".bookimage a img")["src"]
     image_url = urljoin(book_url, image_url)
     book_path = os.path.join(books_folder, book_filename)
@@ -60,19 +60,18 @@ def create_json_file(parsed_books_pages, json_path):
         json.dump(parsed_books_pages, file, ensure_ascii=False)
 
 
-def download_book_file(book_id, book_path):
-    url = "http://tululu.org"
-    payload = {"txt.php": "", "id": book_id}
+def download_book(book_id, book_path):
+    url = "http://tululu.org/txt.php"
+    payload = {"txt.php": "" ,"id": book_id}
     book_file = requests.get(url, params=payload, verify=False)
     check_for_redirection(book_file)
-    with open(book_path, 'wb') as file:
+    filename = os.path.join(books_folder, "{0}{1}".format(title, ".txt"))
+    with open(filename, 'wb') as file:
         file.write(book_file.content)
-
 
 def download_image(image_url, images_folder, title):
     image_file = requests.get(image_url, allow_redirects=True, verify=False)
     check_for_redirection(image_file)
-    images_tags = BeautifulSoup(image_file.text, 'lxml').select("div .bookimage")
     filename = os.path.join(images_folder, "{0}{1}".format(title, image_url[-4:]))
     with open(filename, 'wb') as file:
         file.write(image_file.content)
@@ -109,18 +108,16 @@ if __name__ == "__main__":
     for parsed_book_page in parsed_books_pages:
         book_path = parsed_book_page["book_path"]
         image_url = parsed_book_page["image_url"]
+        title = parsed_book_page["title"].split("/")[0]
         if skip_txt and skip_imgs:
             print("Генерируется файл с информацией о книгах. Добавлена информация о книге '{}'".format(parsed_book_page["title"]))
         elif skip_imgs:
-            title = parsed_book_page["title"]
-            download_book_file(title, book_path)
-            print("Скачана обложка книги '{}'".format(title))
-        elif skip_txt:
-            
-            download_image(image_url, images_folder, title)
+            download_book(title, book_path)
             print("Скачана книга '{}'".format(title))
+        elif skip_txt:
+            download_image(image_url, images_folder, title)
+            print("Скачана обложка книги '{}'".format(title))
         else:
-            title = parsed_book_page["title"].split('/')[0]
-            download_book_file(title, book_path)
+            download_book(title, book_path)
             download_image(image_url, images_folder, title)
             print("Скачана книга '{}'' и обложка к ней".format(title))
