@@ -71,8 +71,7 @@ def download_book_file(book_id, book_path):
 
 def download_image(image_url, images_folder, title):
     image_file = requests.get(image_url, allow_redirects=True, verify=False)
-    image_file.raise_for_status()
-    image_name = image_url.split("tululu.org/")
+    check_for_redirection(image_file)
     images_tags = BeautifulSoup(image_file.text, 'lxml').select("div .bookimage")
     filename = os.path.join(images_folder, "{0}{1}".format(title, image_url[-4:]))
     with open(filename, 'wb') as file:
