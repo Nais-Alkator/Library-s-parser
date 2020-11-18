@@ -9,12 +9,9 @@ import sys
 
 
 def check_for_redirection(response):
-    try:
-        response.raise_for_status()
-        if response.status_code != 200: 
-            raise requests.HTTPError
-    except (requests.HTTPError, requests.ConnectionError) as error:
-        print(f'{error}')
+    response.raise_for_status()
+    if response.status_code != 200: 
+        raise requests.HTTPError
 
 
 def get_books_urls(start_page, end_page):
@@ -46,10 +43,7 @@ def parse_book_page(book_url):
     book_path = os.path.join(books_folder, book_filename)
     genres = soup.find("span", class_="d_book").text
     comments_tags = soup.select("div .texts")
-    comments_text = []
-    for comment_tag in comments_tags:
-        comment = comment_tag.select_one("span")
-        comments_text.append(comment.text)
+    comments_text = [comment_tag.select_one("span").text for comment_tag in comments_tags]
     parsed_book_page = {
         "title": book_filename, 
         "author": author, 
@@ -130,4 +124,4 @@ if __name__ == "__main__":
             title = parsed_book_page["title"].split('/')[0]
             download_book_file(title, book_path)
             download_image(image_url, images_folder, title)
-            print("Скачивание книга '{}'' и обложка к ней".format(title))
+            print("Скачана книга '{}'' и обложка к ней".format(title))
