@@ -5,7 +5,8 @@ from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 import json
 import argparse
-import sys
+import time
+import logging
 
 
 def check_for_redirection(response):
@@ -109,15 +110,23 @@ if __name__ == "__main__":
         book_path = parsed_book_page["book_path"]
         image_url = parsed_book_page["image_url"]
         title = parsed_book_page["title"].split("/")[0]
-        if skip_txt and skip_imgs:
-            print("Генерируется файл с информацией о книгах. Добавлена информация о книге '{}'".format(parsed_book_page["title"]))
-        elif skip_imgs:
-            download_book(title, book_path)
-            print("Скачана книга '{}'".format(title))
-        elif skip_txt:
-            download_image(image_url, images_folder, title)
-            print("Скачана обложка книги '{}'".format(title))
-        else:
-            download_book(title, book_path)
-            download_image(image_url, images_folder, title)
-            print("Скачана книга '{}'' и обложка к ней".format(title))
+        try:
+            if skip_txt and skip_imgs:
+                print("Генерируется файл с информацией о книгах. Добавлена информация о книге '{}'".format(parsed_book_page["title"]))
+            elif skip_imgs:
+                download_book(title, book_path)
+                print("Скачана книга '{}'".format(title))
+                time.sleep(5)    
+            elif skip_txt:
+                download_image(image_url, images_folder, title)
+                print("Скачана обложка книги '{}'".format(title))
+                time.sleep(5)
+            else:
+                download_book(title, book_path)
+                download_image(image_url, images_folder, title)
+                print("Скачана книга '{}'' и обложка к ней".format(title))
+                time.sleep(5)
+        except (requests.HTTPError, requests.ConnectionError)as error:
+            logging.warning(error)
+            time.sleep(5)
+            pass
