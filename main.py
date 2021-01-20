@@ -61,10 +61,11 @@ def create_json_file(parsed_books_pages, json_path):
         json.dump(parsed_books_pages, file, ensure_ascii=False)
 
 
-def download_book(book_id, book_path):
+def download_book(book_id):
     url = "http://tululu.org/txt.php"
-    payload = {"txt.php": "" ,"id": book_id}
+    payload = {"id": book_id}
     book_file = requests.get(url, params=payload, verify=False)
+    print(book_file.url)
     check_for_redirection(book_file)
     filename = os.path.join(books_folder, "{0}{1}".format(title, ".txt"))
     with open(filename, 'wb') as file:
@@ -110,11 +111,12 @@ if __name__ == "__main__":
         book_path = parsed_book_page["book_path"]
         image_url = parsed_book_page["image_url"]
         title = parsed_book_page["title"].split("/")[0]
+        book_id = parsed_book_page["book_id"]
         try:
             if skip_txt and skip_imgs:
                 print("Генерируется файл с информацией о книгах. Добавлена информация о книге '{}'".format(parsed_book_page["title"]))
             elif skip_imgs:
-                download_book(title, book_path)
+                download_book(book_id)
                 print("Скачана книга '{}'".format(title))
                 time.sleep(5)    
             elif skip_txt:
@@ -122,11 +124,11 @@ if __name__ == "__main__":
                 print("Скачана обложка книги '{}'".format(title))
                 time.sleep(5)
             else:
-                download_book(title, book_path)
+                download_book(book_id)
                 download_image(image_url, images_folder, title)
                 print("Скачана книга '{}'' и обложка к ней".format(title))
                 time.sleep(5)
-        except (requests.HTTPError, requests.ConnectionError)as error:
+        except (requests.HTTPError, requests.ConnectionError) as error:
             logging.warning(error)
             time.sleep(5)
             pass
